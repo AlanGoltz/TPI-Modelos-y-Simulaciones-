@@ -1,0 +1,15 @@
+model ConsumoCombustible
+  "Modelo de consumo de combustible de un vehiculo en ruta"
+
+  // TODO: agregar parametros del vehiculo
+
+  // TODO: agregar variables
+
+equation
+  // TODO: agregar ecuaciones
+
+  annotation(
+    experiment(StopTime = 1400, Interval = 1, Tolerance = 1e-6)
+  );
+
+end ConsumoCombustible;
