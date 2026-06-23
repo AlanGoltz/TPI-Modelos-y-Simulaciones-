@@ -1,5 +1,5 @@
 model ConsumoCombustible
-  "Modelo de consumo de combustible de un vehiculo en ruta"
+  "Modelo de consumo de combustible con variables de incertidumbre"
 
   // ── PARAMETROS FIJOS DEL VEHICULO ─────────────────────────────
   parameter Real masa        = 1400   "Masa total vehiculo + carga [kg]";
@@ -11,13 +11,24 @@ model ConsumoCombustible
   parameter Real efic_motor  = 0.30   "Eficiencia termica del motor [-]";
   parameter Real PCI         = 34.2e6 "Poder calorifico inf. nafta [J/L]";
 
-  // ── CONDICIONES DE MARCHA (fijas por ahora) ───────────────────
-  parameter Real v_kmh       = 90     "Velocidad constante [km/h]";
-  parameter Real pendiente   = 0.0    "Pendiente del terreno [-]";
-  parameter Real v_viento_ms = 0.0    "Viento frontal [m/s]";
+  // ── VELOCIDAD BASE configurable ───────────────────────────────
+  parameter Real v_base_kmh  = 90     "Velocidad promedio de crucero [km/h]";
+
+  // ── VARIABLES CON INCERTIDUMBRE ───────────────────────────────
+  // 1) Velocidad instantanea: varia ±15 km/h con periodo de 2 min
+  //    Origen: comportamiento humano, adelantamientos y trafico
+  Real v_kmh   "Velocidad instantanea [km/h]";
+  Real v_ms    "Velocidad instantanea [m/s]";
+
+  // 2) Pendiente del terreno: oscila entre -2.5% y +2.5%
+  //    Origen: perfil topografico ondulado del corredor Crespo-Parana
+  Real pendiente "Pendiente del terreno [-]";
+
+  // 3) Viento frontal: entre 1 y 5 m/s
+  //    Origen: condiciones climaticas variables de la llanura entrerriana
+  Real v_viento_ms "Viento frontal [m/s]";
 
   // ── VARIABLES CALCULADAS ───────────────────────────────────────
-  Real v_ms        "Velocidad en m/s";
   Real F_aero      "Fuerza aerodinamica [N]";
   Real F_rodadura  "Fuerza de rodadura [N]";
   Real F_grav      "Fuerza gravitacional por pendiente [N]";
@@ -34,14 +45,21 @@ initial equation
   distancia_rec = 0;
 
 equation
-  // Conversion de velocidad
-  v_ms = v_kmh / 3.6;
+  // Velocidad con variacion sinusoidal (simula aceleraciones/frenadas del conductor)
+  v_kmh = v_base_kmh + 15 * sin(2 * Modelica.Constants.pi * time / 120);
+  v_ms  = max(v_kmh / 3.6, 0.1);
+
+  // Pendiente oscilante: representa el terreno ondulado de la ruta
+  pendiente = 0.025 * sin(2 * Modelica.Constants.pi * time / 300);
+
+  // Viento frontal variable
+  v_viento_ms = 3.0 + 2.0 * sin(2 * Modelica.Constants.pi * time / 200);
 
   // Tres fuerzas que se oponen al movimiento
   F_aero     = 0.5 * rho_aire * Cd * A * (v_ms + v_viento_ms)^2;
   F_rodadura = Cr * masa * g * cos(atan(pendiente));
   F_grav     = masa * g * sin(atan(pendiente));
-  F_total    = F_aero + F_rodadura + F_grav;
+  F_total    = max(F_aero + F_rodadura + F_grav, 0);
 
   // Potencia mecanica requerida
   potencia = F_total * v_ms;
@@ -55,7 +73,7 @@ equation
 
   annotation(
     experiment(StopTime = 1400, Interval = 1, Tolerance = 1e-6),
-    Documentation(info="Modelo con ecuaciones de fuerzas y consumo. Condiciones de marcha fijas.")
+    Documentation(info="Se incorporan 3 variables con incertidumbre: velocidad, pendiente y viento.")
   );
 
 end ConsumoCombustible;
