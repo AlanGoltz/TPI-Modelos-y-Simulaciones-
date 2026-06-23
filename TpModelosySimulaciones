@@ -1,12 +1,25 @@
 model ConsumoCombustible
   "Modelo de consumo de combustible de un vehiculo en ruta"
 
-  // TODO: agregar parametros del vehiculo
+  // ── PARAMETROS FIJOS DEL VEHICULO ─────────────────────────────
+  parameter Real masa        = 1400   "Masa total vehiculo + carga [kg]";
+  parameter Real Cd          = 0.30   "Coeficiente aerodinamico [-]";
+  parameter Real A           = 2.2    "Area frontal [m^2]";
+  parameter Real Cr          = 0.013  "Coeficiente de rodadura [-]";
+  parameter Real rho_aire    = 1.20   "Densidad del aire [kg/m^3]";
+  parameter Real g           = 9.81   "Gravedad [m/s^2]";
+  parameter Real efic_motor  = 0.30   "Eficiencia termica del motor [-]";
+  parameter Real PCI         = 34.2e6 "Poder calorifico inf. nafta [J/L]";
 
-  // TODO: agregar variables
+  // ── CONDICIONES DE MARCHA (fijas por ahora) ───────────────────
+  parameter Real v_kmh       = 90     "Velocidad constante [km/h]";
+  parameter Real pendiente   = 0.0    "Pendiente del terreno [-]";
+  parameter Real v_viento_ms = 0.0    "Viento frontal [m/s]";
+
+  // TODO: declarar variables calculadas y salidas
 
 equation
-  // TODO: agregar ecuaciones
+  // TODO: agregar ecuaciones de fuerzas y consumo
 
   annotation(
     experiment(StopTime = 1400, Interval = 1, Tolerance = 1e-6)
