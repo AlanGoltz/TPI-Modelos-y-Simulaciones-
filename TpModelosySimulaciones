@@ -16,13 +16,46 @@ model ConsumoCombustible
   parameter Real pendiente   = 0.0    "Pendiente del terreno [-]";
   parameter Real v_viento_ms = 0.0    "Viento frontal [m/s]";
 
-  // TODO: declarar variables calculadas y salidas
+  // ── VARIABLES CALCULADAS ───────────────────────────────────────
+  Real v_ms        "Velocidad en m/s";
+  Real F_aero      "Fuerza aerodinamica [N]";
+  Real F_rodadura  "Fuerza de rodadura [N]";
+  Real F_grav      "Fuerza gravitacional por pendiente [N]";
+  Real F_total     "Fuerza total requerida [N]";
+  Real potencia    "Potencia mecanica requerida [W]";
+
+  // ── SALIDAS ───────────────────────────────────────────────────
+  Real consumo_inst  "Consumo instantaneo [L/100km]";
+  Real consumo_acum  "Consumo acumulado total [L]";
+  Real distancia_rec "Distancia recorrida [m]";
+
+initial equation
+  consumo_acum  = 0;
+  distancia_rec = 0;
 
 equation
-  // TODO: agregar ecuaciones de fuerzas y consumo
+  // Conversion de velocidad
+  v_ms = v_kmh / 3.6;
+
+  // Tres fuerzas que se oponen al movimiento
+  F_aero     = 0.5 * rho_aire * Cd * A * (v_ms + v_viento_ms)^2;
+  F_rodadura = Cr * masa * g * cos(atan(pendiente));
+  F_grav     = masa * g * sin(atan(pendiente));
+  F_total    = F_aero + F_rodadura + F_grav;
+
+  // Potencia mecanica requerida
+  potencia = F_total * v_ms;
+
+  // Consumo instantaneo en L/100km
+  consumo_inst = (potencia / (efic_motor * PCI)) * 100000 / v_ms * 3.6;
+
+  // Integracion: distancia y combustible acumulados
+  der(distancia_rec) = v_ms;
+  der(consumo_acum)  = potencia / (efic_motor * PCI);
 
   annotation(
-    experiment(StopTime = 1400, Interval = 1, Tolerance = 1e-6)
+    experiment(StopTime = 1400, Interval = 1, Tolerance = 1e-6),
+    Documentation(info="Modelo con ecuaciones de fuerzas y consumo. Condiciones de marcha fijas.")
   );
 
 end ConsumoCombustible;
