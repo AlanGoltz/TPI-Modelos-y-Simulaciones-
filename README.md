@@ -82,10 +82,10 @@ El script genera las estadísticas descriptivas y los resultados del test t de S
 
 | Experimento | Consumo medio | vs Base |
 |-------------|---------------|---------|
-| 110 km/h | 13.76 L/100km | +33.7% |
-| 90 km/h (base) | 10.29 L/100km | — |
-| 70 km/h | 8.32 L/100km | −19.2% |
-| 90 km/h + carga | 11.71 L/100km | +13.7% |
+| 110 km/h | 6.32 L/100km | +24.6% |
+| 90 km/h (base) | 5.07 L/100km | — |
+| 70 km/h | 3.80 L/100km | −24.9% |
+| 90 km/h + carga | 5.48 L/100km | +8.4% |
 
 Todas las diferencias son estadísticamente significativas (p < 0.001, test t de Student, n=30 corridas).
 
